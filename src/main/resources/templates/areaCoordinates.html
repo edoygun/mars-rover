@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Set Area Coordinates</title>
+</head>
+<body>
+<!--/*@thymesVar id="plateau" type="com.ercandoygun.marsroverexample.model.Plateau"*/-->
+<div class="row">
+    <form action="#" th:action="@{'/setArea'}" th:object="${plateau}" method="post">
+        <div class="col-md-1">
+            <label>Plateau Grid:</label>
+            <input type="number" class="form-control" th:field="*{position.xdim}"/>
+            <input type="number" class="form-control" th:field="*{position.ydim}"/>
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </div>
+    </form>
+</div>
+</body>
+</html>
