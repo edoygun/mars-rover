@@ -1,6 +1,6 @@
 # Mars Rover App
 
-This is a web app for landing robotic rovers on Mars to scan the are that is determined by the operator.
+This is a web app for landing robotic rovers on Mars to scan the area which is determined by the operator.
 
 Operator can:
 
