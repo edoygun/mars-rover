@@ -6,6 +6,7 @@ import com.ercandoygun.marsroverexample.model.Plateau;
 import com.ercandoygun.marsroverexample.model.Position;
 import com.ercandoygun.marsroverexample.model.Rover;
 import com.ercandoygun.marsroverexample.services.PlateauService;
+import com.ercandoygun.marsroverexample.services.RoverMapService;
 import com.ercandoygun.marsroverexample.services.RoverService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,15 +24,19 @@ public class OperatorController {
     private RoverService roverService;
 
     @Autowired
+    private RoverMapService roverMapService;
+
+    @Autowired
     private PlateauService plateauService;
 
-    @RequestMapping("")
+    @RequestMapping("/operator")
     public String operatorControlPanel(Model model) {
         model.addAttribute("plateau", plateauService.findPlateau());
         return "areaCoordinates";
     }
 
-    @PostMapping("/setArea")
+    @PostMapping
+    @RequestMapping("/setArea")
     public String setAreaCoordinates(@ModelAttribute Plateau command) {
         plateauService.savePlateau(command);
         return "operatorPanel";
@@ -40,7 +45,7 @@ public class OperatorController {
     @GetMapping
     @RequestMapping("/deployRover")
     public String deployRover(Model model) {
-        Set<Rover> rovers = roverService.findAll();
+        Set<Rover> rovers = roverMapService.findAll();
         boolean isOriginOccupied = rovers.stream().filter(r -> r.getPosition().isOrigin()).findAny().orElse(null) != null;
 
         if (isOriginOccupied) {
@@ -50,10 +55,10 @@ public class OperatorController {
             return "operatorPanel";
         }
 
-        Rover rover = new Rover(null, new Position(0,0), Direction.NORTH);
-        roverService.save(rover);
+        Rover rover = new Rover(null, new Position(0,0), Direction.N);
+        roverMapService.save(rover);
 
-        model.addAttribute("rovers", roverService.findAll());
+        model.addAttribute("rovers", roverMapService.findAll());
         model.addAttribute("moveCommand", new MoveCommand());
         return "operatorPanel";
     }
@@ -61,9 +66,9 @@ public class OperatorController {
     @GetMapping
     @RequestMapping("/moveRover/roverId/{roverId}")
     public String moveRover(@ModelAttribute MoveCommand command, @PathVariable Long roverId, Model model) {
-        Rover rover = roverService.findById(roverId);
+        Rover rover = roverMapService.findById(roverId);
         roverService.processRoverCommand(rover, command.getCode());
-        model.addAttribute("rovers", roverService.findAll());
+        model.addAttribute("rovers", roverMapService.findAll());
         return "operatorPanel";
     }
 }

@@ -12,7 +12,10 @@ public class PlateauService {
         return plateau;
     }
 
-    public void savePlateau(Plateau plateau) {this.plateau = plateau;}
+    public Plateau savePlateau(Plateau plateau) {
+        this.plateau = plateau;
+        return plateau;
+    }
 
 
 }

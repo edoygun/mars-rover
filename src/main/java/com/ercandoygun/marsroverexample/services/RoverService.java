@@ -1,6 +1,8 @@
 package com.ercandoygun.marsroverexample.services;
 
 import com.ercandoygun.marsroverexample.enums.Direction;
+import com.ercandoygun.marsroverexample.exception.OutOfGridException;
+import com.ercandoygun.marsroverexample.exception.PossibleCollisionException;
 import com.ercandoygun.marsroverexample.model.Position;
 import com.ercandoygun.marsroverexample.model.Rover;
 import lombok.extern.slf4j.Slf4j;
@@ -17,86 +19,88 @@ public class RoverService {
     @Autowired
     private PlateauService plateauService;
 
-    Map<Long, Rover> map = new HashMap<>();
-
-    public Set<Rover> findAll() {
-        return new HashSet<>(map.values());
-    }
-
-    public Rover findById(Long id) {
-        return map.get(id);
-    }
-
-    public Rover save(Rover rover) {
-        if(rover != null) {
-            if(rover.getId() == null) {
-                rover.setId(getNextId());
-            }
-            map.put(rover.getId(), rover);
-        } else {
-            throw new RuntimeException("Object cannot be null!");
-        }
-        return rover;
-    }
-
-    public Long getNextId() {
-        Long nextId = null;
-        try {
-            nextId = Collections.max(map.keySet()) + 1;
-        } catch (NoSuchElementException e) {
-            nextId = 1L;
-        }
-        return nextId;
-    }
+    @Autowired
+    private RoverMapService roverMapService;
 
     public void processRoverCommand(Rover rover, String code) {
-        List<Character> codes = code.chars().mapToObj(i -> (char) i).collect(Collectors.toList());
+        try {
+            List<Character> codes = code.chars().mapToObj(i -> (char) i).collect(Collectors.toList());
 
-        codes.forEach(c -> {
-            if(c.equals('M')) {
-                moveForward(rover);
-            } else {
-                turnRover(rover, c);
-            }
-        });
+            codes.forEach(c -> {
+                if(c.equals('M')) {
+                    moveForward(rover);
+                } else if(c.equals('L') || c.equals('R')){
+                    turnRover(rover, c);
+                } else {
+                    deployAtGivenPosition(rover, code.toCharArray());
+                }
+            });
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        } finally {
+            roverMapService.save(rover);
+        }
+    }
 
-        save(rover);
+    private void deployAtGivenPosition(Rover rover, char[] codes) {
+        if(codes.length > 3) {
+            throw new RuntimeException("Invalid argument!");
+        }
+
+        Position position = new Position();
+        position.setXdim(Character.getNumericValue(codes[0]));
+        position.setYdim(Character.getNumericValue(codes[1]));
+
+        if(checkTargetPosition(position)) {
+            rover.setPosition(position);
+            log.info("The rover has moved to (" + position.getXdim() + ", " + position.getYdim() + ")");
+        }
+
+        rover.setDirection(Direction.valueOf(String.valueOf(codes[2])));
     }
 
     private void moveForward(Rover rover) {
         Position targetPosition = new Position();
         Position roverPosition = rover.getPosition();
-        targetPosition = roverPosition;
-        Direction direction = rover.getDirection();
-
-        if(direction.equals(Direction.NORTH) || direction.equals(Direction.SOUTH)) {
-            targetPosition.setYdim(roverPosition.getYdim()+1);
-        } else {
-            targetPosition.setXdim(roverPosition.getXdim()+1);
+        targetPosition.setYdim(roverPosition.getYdim());
+        targetPosition.setXdim(roverPosition.getXdim());
+        switch (rover.getDirection().getValue())
+        {
+            case 'N':
+                targetPosition.setYdim(roverPosition.getYdim()+1);
+                break;
+            case 'E':
+                targetPosition.setXdim(roverPosition.getXdim()+1);
+                break;
+            case 'S':
+                targetPosition.setYdim(roverPosition.getYdim()-1);
+                break;
+            case 'W':
+                targetPosition.setXdim(roverPosition.getXdim()-1);
+                break;
+            default:
+                break;
         }
 
         if(checkTargetPosition(targetPosition)) {
             rover.setPosition(targetPosition);
-            save(rover);
             log.info("The rover has moved to (" + targetPosition.getXdim() + ", " + targetPosition.getYdim() + ")");
         }
     }
 
-    private boolean checkTargetPosition(Position targetPosition) {
+    public boolean checkTargetPosition(Position targetPosition) {
         Position plateauArea = plateauService.findPlateau().getPosition();
 
         if(targetPosition.getXdim() > plateauArea.getXdim() || targetPosition.getYdim() > plateauArea.getYdim()) {
-            log.info("The rover cannot go outside of the grid!");
-            return false;
+            throw new OutOfGridException("The rover cannot go outside of the grid!");
         }
 
-        boolean possibleCollision = findAll().stream().filter(r ->
+        boolean possibleCollision = roverMapService.findAll().stream().filter(r ->
                 targetPosition.getYdim() == r.getPosition().getYdim() && targetPosition.getXdim() == r.getPosition().getXdim())
                 .findAny().orElse(null) != null;
 
         if(possibleCollision) {
-            log.info("The rover has stopped because of possible collision with another rover!");
-            return false;
+            throw new PossibleCollisionException("The rover has stopped because of possible collision with another rover!");
         }
 
         return  true;
@@ -107,8 +111,6 @@ public class RoverService {
             turnLeft(rover);
         } else if(c.equals('R')) {
             turnRight(rover);
-        } else {
-            return;
         }
     }
 
@@ -116,16 +118,16 @@ public class RoverService {
         switch (rover.getDirection().getValue())
         {
             case 'N':
-                rover.setDirection(Direction.EAST);
+                rover.setDirection(Direction.E);
                 break;
             case 'E':
-                rover.setDirection(Direction.SOUTH);
+                rover.setDirection(Direction.S);
                 break;
             case 'S':
-                rover.setDirection(Direction.WEST);
+                rover.setDirection(Direction.W);
                 break;
             case 'W':
-                rover.setDirection(Direction.NORTH);
+                rover.setDirection(Direction.N);
                 break;
             default:
                 break;
@@ -136,16 +138,16 @@ public class RoverService {
         switch (rover.getDirection().getValue())
         {
             case 'N':
-                rover.setDirection(Direction.WEST);
+                rover.setDirection(Direction.W);
                 break;
             case 'W':
-                rover.setDirection(Direction.SOUTH);
+                rover.setDirection(Direction.S);
                 break;
             case 'S':
-                rover.setDirection(Direction.EAST);
+                rover.setDirection(Direction.E);
                 break;
             case 'E':
-                rover.setDirection(Direction.NORTH);
+                rover.setDirection(Direction.N);
                 break;
             default:
                 break;

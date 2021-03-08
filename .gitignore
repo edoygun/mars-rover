@@ -22,6 +22,8 @@ target/
 ######################
 # Maven
 ######################
+mvnw
+mvnw.cmd
 /log/
 /target/
 

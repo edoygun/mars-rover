@@ -1,7 +1,9 @@
 package com.ercandoygun.marsroverexample.enums;
 
+import java.util.Arrays;
+
 public enum Direction {
-    NORTH('N'), WEST('W'), SOUTH('S'), EAST('E');
+    N('N'), W('W'), S('S'), E('E');
 
     private char value;
 
@@ -11,9 +13,5 @@ public enum Direction {
 
     public char getValue() {
         return value;
-    }
-
-    public void setValue(char value) {
-        this.value = value;
     }
 }
