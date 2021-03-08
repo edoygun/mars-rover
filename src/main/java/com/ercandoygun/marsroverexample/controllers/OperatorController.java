@@ -2,6 +2,7 @@ package com.ercandoygun.marsroverexample.controllers;
 
 import com.ercandoygun.marsroverexample.command.MoveCommand;
 import com.ercandoygun.marsroverexample.enums.Direction;
+import com.ercandoygun.marsroverexample.exception.PossibleCollisionException;
 import com.ercandoygun.marsroverexample.model.Plateau;
 import com.ercandoygun.marsroverexample.model.Position;
 import com.ercandoygun.marsroverexample.model.Rover;
@@ -46,19 +47,21 @@ public class OperatorController {
     @RequestMapping("/deployRover")
     public String deployRover(Model model) {
         Set<Rover> rovers = roverMapService.findAll();
-        boolean isOriginOccupied = rovers.stream().filter(r -> r.getPosition().isOrigin()).findAny().orElse(null) != null;
+        try {
+            boolean isOriginOccupied = rovers.stream().filter(r -> r.getPosition().isOrigin()).findAny().orElse(null) != null;
 
-        if (isOriginOccupied) {
-            log.info("Deployment area is occupied by another rover!");
+            if (isOriginOccupied) {
+                throw new PossibleCollisionException("The origin is occupied by another rover!");
+            }
+
+            Rover rover = new Rover(null, new Position(0,0), Direction.N);
+            roverMapService.save(rover);
+            model.addAttribute("rovers", roverMapService.findAll());
+        } catch (Exception e) {
+            log.error(e.getMessage());
             model.addAttribute("rovers", rovers);
-            model.addAttribute("moveCommand", new MoveCommand());
-            return "operatorPanel";
         }
 
-        Rover rover = new Rover(null, new Position(0,0), Direction.N);
-        roverMapService.save(rover);
-
-        model.addAttribute("rovers", roverMapService.findAll());
         model.addAttribute("moveCommand", new MoveCommand());
         return "operatorPanel";
     }
