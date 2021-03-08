@@ -11,10 +11,6 @@ Operator can:
 -Direct the rovers to scan the area.
 
 
-After running the application you can open the controller panel with the below link:
--http://localhost:8080/operator
-
-
 Technologies and libraries used:
 
 -Spring Boot
@@ -31,3 +27,9 @@ How to run locally with mvn:
 
 -mvn spring-boot:run -> run application
 
+
+
+
+
+After running the application you can open the controller panel with the below link:
+-http://localhost:8080/operator
