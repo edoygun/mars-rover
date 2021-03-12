@@ -72,7 +72,7 @@ class OperatorControllerTest {
 
     @Test
     void deployRover() throws Exception {
-        Rover rover = new Rover(null, new Position(0, 0), Direction.N);
+        Rover rover = new Rover(null, new Position(0, 0), Direction.N, false);
         Set<Rover> rovers = new HashSet<>();
         rovers.add(rover);
 
@@ -86,7 +86,7 @@ class OperatorControllerTest {
 
     @Test
     void cancelDeploymentBecauseOriginIsOccupied() throws Exception {
-        Rover rover = new Rover(null, new Position(0, 0), Direction.N);
+        Rover rover = new Rover(null, new Position(0, 0), Direction.N, false);
         Set<Rover> rovers = new HashSet<>();
         rovers.add(rover);
 
@@ -102,7 +102,7 @@ class OperatorControllerTest {
 
     @Test
     void moveRover() throws Exception {
-        Rover rover = new Rover(1L, new Position(0, 0), Direction.N);
+        Rover rover = new Rover(1L, new Position(0, 0), Direction.N, false);
         Set<Rover> rovers = new HashSet<>();
         rovers.add(rover);
 

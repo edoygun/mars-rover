@@ -54,7 +54,7 @@ public class OperatorController {
                 throw new PossibleCollisionException("The origin is occupied by another rover!");
             }
 
-            Rover rover = new Rover(null, new Position(0,0), Direction.N);
+            Rover rover = new Rover(null, new Position(0,0), Direction.N, false);
             roverMapService.save(rover);
             model.addAttribute("rovers", roverMapService.findAll());
         } catch (Exception e) {

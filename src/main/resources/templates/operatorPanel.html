@@ -30,6 +30,7 @@
         <th style="width: 100px;">Y Coordinate</th>
         <th style="width: 100px;">Direction</th>
         <th style="width: 100px;">Command</th>
+        <th style="width: 100px;">Grid Status</th>
     </tr>
     </thead>
 
@@ -46,6 +47,7 @@
                     <button type="submit" class="btn btn-primary">Move</button>
                 </form>
             </td>
+            <td th:if="${rover.isOutOfGrid()}" th:text="RIP"></td>
         </tr>
     </tbody>
 </table>

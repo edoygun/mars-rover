@@ -84,6 +84,7 @@ public class RoverService {
 
         if(checkTargetPosition(targetPosition)) {
             rover.setPosition(targetPosition);
+            rover.setOutOfGrid(plateauService.isOutOfGrid(targetPosition));
             log.info("The rover has moved to (" + targetPosition.getXdim() + ", " + targetPosition.getYdim() + ")");
         }
     }
@@ -91,9 +92,9 @@ public class RoverService {
     public boolean checkTargetPosition(Position targetPosition) {
         Position plateauArea = plateauService.findPlateau().getPosition();
 
-        if(targetPosition.getXdim() > plateauArea.getXdim() || targetPosition.getYdim() > plateauArea.getYdim()) {
-            throw new OutOfGridException("The rover cannot go outside of the grid!");
-        }
+        //if(targetPosition.getXdim() > plateauArea.getXdim() || targetPosition.getYdim() > plateauArea.getYdim()) {
+            //throw new OutOfGridException("The rover cannot go outside of the grid!");
+        //}
 
         boolean possibleCollision = roverMapService.findAll().stream().filter(r ->
                 targetPosition.getYdim() == r.getPosition().getYdim() && targetPosition.getXdim() == r.getPosition().getXdim())

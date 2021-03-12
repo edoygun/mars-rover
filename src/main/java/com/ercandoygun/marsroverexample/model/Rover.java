@@ -15,5 +15,6 @@ public class Rover {
     private Long id;
     private Position position;
     private Direction direction;
+    private boolean outOfGrid;
 
 }
